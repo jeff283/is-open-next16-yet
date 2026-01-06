@@ -1,310 +1,194 @@
-Welcome to your new TanStack app! 
+# Is Open Next 16 Yet
 
-# Getting Started
+A simple, clean web application that tracks whether [OpenNextJS Cloudflare](https://github.com/opennextjs/opennextjs-cloudflare) has added support for Next.js 16 yet.
 
-To run this application:
+## Purpose
+
+Next.js 16 was released with groundbreaking new features including Cache Components, improved performance, and enhanced developer experience. However, developers using OpenNextJS Cloudflare have been waiting months for Next.js 16 support.
+
+This app was created to provide a clear, simple answer to the question: **"Is OpenNextJS Cloudflare using Next.js 16 yet?"**
+
+It automatically checks the latest version from their repository and displays the current status, along with how long the community has been waiting for this support.
+
+**Related Issue:** [GitHub Issue #972](https://github.com/opennextjs/opennextjs-cloudflare/issues/972)
+
+## Features
+
+- **Real-time Status Check** - Automatically fetches the latest Next.js version from OpenNextJS Cloudflare's repository
+- **Issue Tracking** - Shows how many days since the GitHub issue was created and last updated
+- **Clean Neo-Brutalist Design** - Minimal, bold, high-contrast UI
+- **SEO Optimized** - Full Open Graph and Twitter Card support
+- **Error Handling** - Graceful fallbacks when API calls fail
+- **Type-Safe** - Built with TypeScript and Zod validation
+
+## Tech Stack
+
+- **[TanStack Start](https://tanstack.com/start/latest/docs/framework/react/overview)** - Full-stack React framework with SSR, streaming, and server functions
+- **[TanStack Router](https://tanstack.com/router)** - File-based routing with SSR
+- **[React 19](https://react.dev/)** - UI library
+- **[TypeScript](https://www.typescriptlang.org/)** - Type safety
+- **[Tailwind CSS](https://tailwindcss.com/)** - Styling
+- **[Zod](https://zod.dev/)** - Schema validation
+- **[Vite](https://vitejs.dev/)** - Build tool
+- **[Cloudflare Workers](https://workers.cloudflare.com/)** - Deployment platform
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+ or Bun
+- pnpm (recommended) or npm/yarn
+
+### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/yourusername/is-open-next16-yet.git
+cd is-open-next16-yet
+
+# Install dependencies
 pnpm install
-pnpm start
 ```
 
-# Building For Production
-
-To build this application for production:
+### Development
 
 ```bash
+# Start development server
+pnpm dev
+
+# The app will be available at http://localhost:3000
+```
+
+### Building
+
+```bash
+# Build for production
 pnpm build
+
+# Preview production build
+pnpm preview
+```
+
+## Project Structure
+
+```
+src/
+├── lib/
+│   ├── api.ts          # API functions for fetching data
+│   ├── constants.ts    # Configuration constants
+│   ├── schemas.ts      # Zod validation schemas
+│   ├── seo.ts          # SEO meta tag generation
+│   └── types.ts        # TypeScript type definitions
+├── routes/
+│   ├── __root.tsx      # Root layout with error/404 handlers
+│   ├── index.tsx        # Home page
+│   └── about.tsx        # About page
+└── integrations/       # TanStack Query setup
 ```
 
 ## Testing
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
-
 ```bash
+# Run tests
 pnpm test
+
+# Run tests in watch mode
+pnpm test --watch
 ```
 
-## Styling
-
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
-
-
-## Linting & Formatting
-
-
-This project uses [eslint](https://eslint.org/) and [prettier](https://prettier.io/) for linting and formatting. Eslint is configured using [tanstack/eslint-config](https://tanstack.com/config/latest/docs/eslint). The following scripts are available:
+## Code Quality
 
 ```bash
+# Lint code
 pnpm lint
+
+# Format code
 pnpm format
+
+# Run both lint and format
 pnpm check
 ```
 
+## Deployment
 
-## Shadcn
+This app is designed to be deployed on Cloudflare Workers.
 
-Add components using the latest version of [Shadcn](https://ui.shadcn.com/).
+### Prerequisites
 
-```bash
-pnpm dlx shadcn@latest add button
-```
+1. Install Wrangler CLI:
+   ```bash
+   pnpm add -D wrangler
+   ```
 
+2. Authenticate with Cloudflare:
+   ```bash
+   npx wrangler login
+   ```
 
-
-## Routing
-This project uses [TanStack Router](https://tanstack.com/router). The initial setup is a file based router. Which means that the routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add another a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you use the `<Outlet />` component.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-
-import { Link } from "@tanstack/react-router";
-
-export const Route = createRootRoute({
-  component: () => (
-    <>
-      <header>
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-        </nav>
-      </header>
-      <Outlet />
-      <TanStackRouterDevtools />
-    </>
-  ),
-})
-```
-
-The `<TanStackRouterDevtools />` component is not required so you can remove it if you don't want it in your layout.
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-const peopleRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/people",
-  loader: async () => {
-    const response = await fetch("https://swapi.dev/api/people");
-    return response.json() as Promise<{
-      results: {
-        name: string;
-      }[];
-    }>;
-  },
-  component: () => {
-    const data = peopleRoute.useLoaderData();
-    return (
-      <ul>
-        {data.results.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    );
-  },
-});
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-### React-Query
-
-React-Query is an excellent addition or alternative to route loading and integrating it into you application is a breeze.
-
-First add your dependencies:
+### Deploy
 
 ```bash
-pnpm add @tanstack/react-query @tanstack/react-query-devtools
+# Build and deploy
+pnpm deploy:build
+
+# Or deploy without building first (if already built)
+pnpm deploy
 ```
 
-Next we'll need to create a query client and provider. We recommend putting those in `main.tsx`.
+### Environment Variables
 
-```tsx
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+Update `BASE_URL` in `src/lib/constants.ts` with your production domain before deploying.
 
-// ...
+## Data Sources
 
-const queryClient = new QueryClient();
+The app fetches data from:
 
-// ...
+1. **Package.json** - Checks Next.js version from OpenNextJS Cloudflare repository:
+   ```
+   https://raw.githubusercontent.com/opennextjs/opennextjs-cloudflare/refs/heads/main/create-cloudflare/next/package.json
+   ```
 
-if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement);
+2. **GitHub Issue API** - Fetches issue metadata (updates, closure status):
+   ```
+   https://api.github.com/repos/opennextjs/opennextjs-cloudflare/issues/972
+   ```
 
-  root.render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  );
-}
-```
+## Design Philosophy
 
-You can also add TanStack Query Devtools to the root route (optional).
+This app uses a **neo-brutalist** design style:
+- Thick black borders (`border-4`)
+- High contrast colors (black, white, red, green)
+- Bold typography
+- Minimal shadows and effects
+- Clean, geometric layouts
 
-```tsx
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+## Contributing
 
-const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <ReactQueryDevtools buttonPosition="top-right" />
-      <TanStackRouterDevtools />
-    </>
-  ),
-});
-```
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-Now you can use `useQuery` to fetch your data.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-```tsx
-import { useQuery } from "@tanstack/react-query";
+## License
 
-import "./App.css";
+This project is open source and available under the [MIT License](LICENSE).
 
-function App() {
-  const { data } = useQuery({
-    queryKey: ["people"],
-    queryFn: () =>
-      fetch("https://swapi.dev/api/people")
-        .then((res) => res.json())
-        .then((data) => data.results as { name: string }[]),
-    initialData: [],
-  });
+## Acknowledgments
 
-  return (
-    <div>
-      <ul>
-        {data.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+- [OpenNextJS Cloudflare](https://github.com/opennextjs/opennextjs-cloudflare) - The project we're tracking
+- [TanStack](https://tanstack.com/) - Amazing React ecosystem
+- The community waiting for Next.js 16 support
 
-export default App;
-```
+## Links
 
-You can find out everything you need to know on how to use React-Query in the [React-Query documentation](https://tanstack.com/query/latest/docs/framework/react/overview).
+- **Live Site**: [Coming soon]
+- **GitHub Issue**: [Issue #972](https://github.com/opennextjs/opennextjs-cloudflare/issues/972)
+- **OpenNextJS Cloudflare**: [Repository](https://github.com/opennextjs/opennextjs-cloudflare)
+- **Next.js 16**: [Release Notes](https://nextjs.org/blog/next-16)
 
-## State Management
+---
 
-Another common requirement for React applications is state management. There are many options for state management in React. TanStack Store provides a great starting point for your project.
-
-First you need to add TanStack Store as a dependency:
-
-```bash
-pnpm add @tanstack/store
-```
-
-Now let's create a simple counter in the `src/App.tsx` file as a demonstration.
-
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-function App() {
-  const count = useStore(countStore);
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-    </div>
-  );
-}
-
-export default App;
-```
-
-One of the many nice features of TanStack Store is the ability to derive state from other state. That derived state will update when the base state updates.
-
-Let's check this out by doubling the count using derived state.
-
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store, Derived } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-const doubledStore = new Derived({
-  fn: () => countStore.state * 2,
-  deps: [countStore],
-});
-doubledStore.mount();
-
-function App() {
-  const count = useStore(countStore);
-  const doubledCount = useStore(doubledStore);
-
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-      <div>Doubled - {doubledCount}</div>
-    </div>
-  );
-}
-
-export default App;
-```
-
-We use the `Derived` class to create a new store that is derived from another store. The `Derived` class has a `mount` method that will start the derived store updating.
-
-Once we've created the derived store we can use it in the `App` component just like we would any other store using the `useStore` hook.
-
-You can find out everything you need to know on how to use TanStack Store in the [TanStack Store documentation](https://tanstack.com/store/latest).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
+Made with love (and a bit of frustration) by the community
