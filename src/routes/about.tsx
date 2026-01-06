@@ -1,6 +1,107 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/about')({
+  head: () => {
+    // const baseUrl = 'https://is-open-next16-yet.pages.dev' // Update with your actual domain
+    const baseUrl = 'http://localhost:3000' // Update with your actual domain
+    const siteUrl = `${baseUrl}/about`
+
+    return {
+      meta: [
+        {
+          title: 'About - Is OpenNextJS Cloudflare Using Next.js 16?',
+        },
+        {
+          name: 'description',
+          content:
+            'Learn why this app was created and why OpenNextJS Cloudflare support for Next.js 16 matters. Check the status of GitHub Issue #972.',
+        },
+        {
+          name: 'keywords',
+          content:
+            'OpenNextJS, Cloudflare, Next.js 16, GitHub Issue 972, Next.js support, React, Cloudflare Workers',
+        },
+        {
+          name: 'robots',
+          content: 'index, follow',
+        },
+        // Open Graph tags
+        {
+          property: 'og:title',
+          content: 'About - Is OpenNextJS Cloudflare Using Next.js 16?',
+        },
+        {
+          property: 'og:description',
+          content:
+            'Learn why this app was created and why OpenNextJS Cloudflare support for Next.js 16 matters.',
+        },
+        {
+          property: 'og:type',
+          content: 'website',
+        },
+        {
+          property: 'og:url',
+          content: siteUrl,
+        },
+        {
+          property: 'og:site_name',
+          content: 'Is Open Next 16 Yet?',
+        },
+        {
+          property: 'og:locale',
+          content: 'en_US',
+        },
+        {
+          property: 'og:image',
+          content: `${baseUrl}/og-image.png`, // Create a 1200x630px image for social previews
+        },
+        {
+          property: 'og:image:width',
+          content: '1200',
+        },
+        {
+          property: 'og:image:height',
+          content: '630',
+        },
+        {
+          property: 'og:image:alt',
+          content: 'About - Is OpenNextJS Cloudflare Using Next.js 16?',
+        },
+        // Twitter Card tags
+        {
+          name: 'twitter:card',
+          content: 'summary_large_image',
+        },
+        {
+          name: 'twitter:title',
+          content: 'About - Is OpenNextJS Cloudflare Using Next.js 16?',
+        },
+        {
+          name: 'twitter:description',
+          content:
+            'Learn why this app was created and why OpenNextJS Cloudflare support for Next.js 16 matters.',
+        },
+        {
+          name: 'twitter:image',
+          content: `${baseUrl}/og-image.png`, // Create a 1200x630px image for social previews
+        },
+        {
+          name: 'twitter:url',
+          content: siteUrl,
+        },
+        {
+          name: 'twitter:site',
+          content: '@opennextjs', // Update if you have a Twitter handle
+        },
+      ],
+      links: [
+        {
+          rel: 'canonical',
+          href: siteUrl,
+        },
+      ],
+    }
+  },
   component: About,
 })
 
