@@ -14,35 +14,131 @@ const packageJsonUrl =
 const targetVersion = 16
 
 const getOpenNextVersion = async () => {
-  const response = await fetch(packageJsonUrl)
-  const data = await response.json()
-  const parsed = packageJsonSchema.parse(data)
-  const version = parsed.dependencies.next
-  const versionNumber = parseInt(version.split('.')[0], 10)
-  const responseData = {
-    isOpenNext16Yet: versionNumber >= targetVersion,
-    versionNumber,
-    version,
+  try {
+    const response = await fetch(packageJsonUrl, {
+      headers: {
+        Accept: 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch package.json: ${response.status} ${response.statusText}`,
+      )
+    }
+
+    const data = await response.json()
+
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid response: expected JSON object')
+    }
+
+    const parsed = packageJsonSchema.parse(data)
+    const version = parsed.dependencies.next
+
+    if (!version || typeof version !== 'string') {
+      throw new Error('Invalid version format in package.json')
+    }
+
+    const versionNumber = parseInt(version.split('.')[0], 10)
+
+    if (isNaN(versionNumber)) {
+      throw new Error(`Could not parse version number from: ${version}`)
+    }
+
+    return {
+      isOpenNext16Yet: versionNumber >= targetVersion,
+      versionNumber,
+      version,
+    }
+  } catch (error) {
+    console.error('Error fetching OpenNextJS version:', error)
+    // Return fallback values on error
+    return {
+      isOpenNext16Yet: false,
+      versionNumber: 15,
+      version: '15.x.x (error loading)',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
   }
-  return responseData
 }
 
 const issueLink =
   'https://api.github.com/repos/opennextjs/opennextjs-cloudflare/issues/972'
 const getDaysSinceIssueCreation = async () => {
-  const response = await fetch(issueLink)
-  const data = await response.json()
-  const createdAt = new Date(data.created_at)
-  const now = new Date()
-  return Math.floor(
-    (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24),
-  )
+  try {
+    const response = await fetch(issueLink, {
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch GitHub issue: ${response.status} ${response.statusText}`,
+      )
+    }
+
+    const data = await response.json()
+
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid response: expected JSON object')
+    }
+
+    if (!data.created_at || typeof data.created_at !== 'string') {
+      throw new Error('Missing or invalid created_at field in issue data')
+    }
+
+    const createdAt = new Date(data.created_at)
+
+    if (isNaN(createdAt.getTime())) {
+      throw new Error(`Invalid date format: ${data.created_at}`)
+    }
+
+    const now = new Date()
+    const daysSince = Math.floor(
+      (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24),
+    )
+
+    if (daysSince < 0) {
+      throw new Error('Calculated days is negative (future date)')
+    }
+
+    return daysSince
+  } catch (error) {
+    console.error('Error fetching days since issue creation:', error)
+    // Return fallback value - approximate based on issue creation date (Nov 4, 2024)
+    const fallbackDate = new Date('2024-11-04')
+    const now = new Date()
+    const fallbackDays = Math.floor(
+      (now.getTime() - fallbackDate.getTime()) / (1000 * 60 * 60 * 24),
+    )
+    return fallbackDays > 0 ? fallbackDays : 0
+  }
 }
 export const Route = createFileRoute('/')({
   loader: async () => {
-    const openNextVersion = await getOpenNextVersion()
-    const daysSinceIssueCreation = await getDaysSinceIssueCreation()
-    return { ...openNextVersion, daysSinceIssueCreation }
+    try {
+      const [openNextVersion, daysSinceIssueCreation] = await Promise.all([
+        getOpenNextVersion(),
+        getDaysSinceIssueCreation(),
+      ])
+
+      return {
+        ...openNextVersion,
+        daysSinceIssueCreation,
+      }
+    } catch (error) {
+      console.error('Error in loader:', error)
+      // Return fallback values if loader fails completely
+      return {
+        isOpenNext16Yet: false,
+        versionNumber: 15,
+        version: '15.x.x (error loading)',
+        daysSinceIssueCreation: 0,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }
+    }
   },
   head: ({ loaderData }) => {
     const data = loaderData ?? {
@@ -167,11 +263,25 @@ export const Route = createFileRoute('/')({
 })
 
 function App() {
-  const { isOpenNext16Yet, versionNumber, version, daysSinceIssueCreation } =
-    Route.useLoaderData()
+  const {
+    isOpenNext16Yet,
+    versionNumber,
+    version,
+    daysSinceIssueCreation,
+    error,
+  } = Route.useLoaderData()
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-white">
       <div className="w-full max-w-2xl">
+        {/* Error Banner */}
+        {error && (
+          <div className="border-4 border-black p-4 mb-4 bg-yellow-100">
+            <p className="text-sm font-bold text-black">
+              ⚠️ Unable to fetch latest data. Showing cached/fallback values.
+            </p>
+          </div>
+        )}
+
         {/* Main Status Card */}
         <div
           className={`border-4 border-black p-8 mb-6 ${
