@@ -43,7 +43,11 @@ function App() {
           }`}
         >
           <div className="text-center">
-            <h1 className="text-6xl font-black mb-4 text-black">
+            <h1
+              className={`font-black mb-4 text-black ${
+                isOpenNext16Yet ? 'text-6xl' : 'text-9xl'
+              }`}
+            >
               {isOpenNext16Yet ? 'YES' : 'NO'}
             </h1>
             <p className="text-2xl font-bold text-black mb-2">
