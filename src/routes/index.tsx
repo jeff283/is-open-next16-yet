@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { z } from 'zod'
 
 const packageJsonSchema = z.object({
@@ -115,6 +115,16 @@ function App() {
             It's been {daysSinceIssueCreation} days since the issue was created
             and still no Next.js 16 support
           </p>
+        </div>
+
+        {/* Footer Navigation */}
+        <div className="mt-8 text-center">
+          <Link
+            to="/about"
+            className="text-xs text-black underline hover:no-underline"
+          >
+            About
+          </Link>
         </div>
       </div>
     </div>
