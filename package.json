@@ -10,7 +10,10 @@
     "lint": "eslint",
     "format": "prettier",
     "check": "prettier --write . && eslint --fix",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": " wrangler deploy",
+    "deploy:build": "pnpm run build && wrangler deploy",
+    "upload:build": "pnpm run build && wrangler versions upload",
+    "upload": "wrangler versions upload"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.13.8",
