@@ -1,123 +1,11 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { z } from 'zod'
+import { getOpenNextVersion, getDaysSinceIssueCreation } from '../lib/api'
+import { generateHomePageMeta } from '../lib/seo'
+import { TARGET_VERSION } from '../lib/constants'
+import type { LoaderData } from '../lib/types'
 
-const packageJsonSchema = z.object({
-  dependencies: z.object({
-    next: z.string(),
-  }),
-})
-
-const packageJsonUrl =
-  'https://raw.githubusercontent.com/opennextjs/opennextjs-cloudflare/refs/heads/main/create-cloudflare/next/package.json'
-
-// Next js 16 and above
-const targetVersion = 16
-
-const getOpenNextVersion = async () => {
-  try {
-    const response = await fetch(packageJsonUrl, {
-      headers: {
-        Accept: 'application/json',
-      },
-    })
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch package.json: ${response.status} ${response.statusText}`,
-      )
-    }
-
-    const data = await response.json()
-
-    if (!data || typeof data !== 'object') {
-      throw new Error('Invalid response: expected JSON object')
-    }
-
-    const parsed = packageJsonSchema.parse(data)
-    const version = parsed.dependencies.next
-
-    if (!version || typeof version !== 'string') {
-      throw new Error('Invalid version format in package.json')
-    }
-
-    const versionNumber = parseInt(version.split('.')[0], 10)
-
-    if (isNaN(versionNumber)) {
-      throw new Error(`Could not parse version number from: ${version}`)
-    }
-
-    return {
-      isOpenNext16Yet: versionNumber >= targetVersion,
-      versionNumber,
-      version,
-    }
-  } catch (error) {
-    console.error('Error fetching OpenNextJS version:', error)
-    // Return fallback values on error
-    return {
-      isOpenNext16Yet: false,
-      versionNumber: 15,
-      version: '15.x.x (error loading)',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    }
-  }
-}
-
-const issueLink =
-  'https://api.github.com/repos/opennextjs/opennextjs-cloudflare/issues/972'
-const getDaysSinceIssueCreation = async () => {
-  try {
-    const response = await fetch(issueLink, {
-      headers: {
-        Accept: 'application/vnd.github.v3+json',
-      },
-    })
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch GitHub issue: ${response.status} ${response.statusText}`,
-      )
-    }
-
-    const data = await response.json()
-
-    if (!data || typeof data !== 'object') {
-      throw new Error('Invalid response: expected JSON object')
-    }
-
-    if (!data.created_at || typeof data.created_at !== 'string') {
-      throw new Error('Missing or invalid created_at field in issue data')
-    }
-
-    const createdAt = new Date(data.created_at)
-
-    if (isNaN(createdAt.getTime())) {
-      throw new Error(`Invalid date format: ${data.created_at}`)
-    }
-
-    const now = new Date()
-    const daysSince = Math.floor(
-      (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24),
-    )
-
-    if (daysSince < 0) {
-      throw new Error('Calculated days is negative (future date)')
-    }
-
-    return daysSince
-  } catch (error) {
-    console.error('Error fetching days since issue creation:', error)
-    // Return fallback value - approximate based on issue creation date (Nov 4, 2024)
-    const fallbackDate = new Date('2024-11-04')
-    const now = new Date()
-    const fallbackDays = Math.floor(
-      (now.getTime() - fallbackDate.getTime()) / (1000 * 60 * 60 * 24),
-    )
-    return fallbackDays > 0 ? fallbackDays : 0
-  }
-}
 export const Route = createFileRoute('/')({
-  loader: async () => {
+  loader: async (): Promise<LoaderData> => {
     try {
       const [openNextVersion, daysSinceIssueCreation] = await Promise.all([
         getOpenNextVersion(),
@@ -141,123 +29,7 @@ export const Route = createFileRoute('/')({
     }
   },
   head: ({ loaderData }) => {
-    const data = loaderData ?? {
-      isOpenNext16Yet: false,
-      versionNumber: 15,
-      version: '15.x.x',
-      daysSinceIssueCreation: 0,
-    }
-    const { isOpenNext16Yet, version, daysSinceIssueCreation } = data
-    const status = isOpenNext16Yet ? 'YES' : 'NO'
-    const description = isOpenNext16Yet
-      ? `OpenNextJS Cloudflare is now using Next.js ${version}! 🎉`
-      : `OpenNextJS Cloudflare is still NOT using Next.js 16. It's been ${daysSinceIssueCreation} days since the issue was created. Currently using Next.js ${version}.`
-
-    // Base URL - update this when you deploy
-    // const baseUrl = 'https://is-open-next16-yet.pages.dev' // Update with your actual domain
-    const baseUrl = 'http://localhost:3000' // Update with your actual domain
-    const siteUrl = baseUrl
-
-    return {
-      meta: [
-        {
-          title: `Is OpenNextJS Cloudflare Using Next.js 16? ${status}`,
-        },
-        {
-          name: 'description',
-          content: description,
-        },
-        {
-          name: 'keywords',
-          content:
-            'OpenNextJS, Cloudflare, Next.js 16, Next.js, React, Cloudflare Workers, deployment',
-        },
-        {
-          name: 'author',
-          content: 'Is Open Next 16 Yet?',
-        },
-        {
-          name: 'robots',
-          content: 'index, follow',
-        },
-        // Open Graph tags
-        {
-          property: 'og:title',
-          content: `Is OpenNextJS Cloudflare Using Next.js 16? ${status}`,
-        },
-        {
-          property: 'og:description',
-          content: description,
-        },
-        {
-          property: 'og:type',
-          content: 'website',
-        },
-        {
-          property: 'og:url',
-          content: siteUrl,
-        },
-        {
-          property: 'og:site_name',
-          content: 'Is Open Next 16 Yet?',
-        },
-        {
-          property: 'og:locale',
-          content: 'en_US',
-        },
-        {
-          property: 'og:image',
-          content: `${baseUrl}/og-image.png`, // Create a 1200x630px image for social previews
-        },
-        {
-          property: 'og:image:width',
-          content: '1200',
-        },
-        {
-          property: 'og:image:height',
-          content: '630',
-        },
-        {
-          property: 'og:image:alt',
-          content: `OpenNextJS Cloudflare Next.js 16 Status: ${status}`,
-        },
-        // Twitter Card tags
-        {
-          name: 'twitter:card',
-          content: 'summary_large_image',
-        },
-        {
-          name: 'twitter:title',
-          content: `Is OpenNextJS Cloudflare Using Next.js 16? ${status}`,
-        },
-        {
-          name: 'twitter:description',
-          content: description,
-        },
-        {
-          name: 'twitter:image',
-          content: `${baseUrl}/og-image.png`, // Create a 1200x630px image for social previews
-        },
-        {
-          name: 'twitter:url',
-          content: siteUrl,
-        },
-        {
-          name: 'twitter:site',
-          content: '@opennextjs', // Update if you have a Twitter handle
-        },
-        {
-          name: 'twitter:creator',
-          content: '@opennextjs', // Update if you have a Twitter handle
-        },
-      ],
-      links: [
-        {
-          rel: 'canonical',
-          href: siteUrl,
-        },
-      ],
-    }
+    return generateHomePageMeta(loaderData)
   },
   component: App,
 })
@@ -329,7 +101,7 @@ function App() {
                 Target Version:
               </span>
               <span className="text-xl font-black text-black">
-                {targetVersion}
+                {TARGET_VERSION}
               </span>
             </div>
           </div>

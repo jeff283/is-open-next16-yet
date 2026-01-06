@@ -1,10 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { BASE_URL, SITE_NAME, TWITTER_HANDLE } from '../lib/constants'
 
 export const Route = createFileRoute('/about')({
   head: () => {
-    // const baseUrl = 'https://is-open-next16-yet.pages.dev' // Update with your actual domain
-    const baseUrl = 'http://localhost:3000' // Update with your actual domain
-    const siteUrl = `${baseUrl}/about`
+    const siteUrl = `${BASE_URL}/about`
 
     return {
       meta: [
@@ -45,7 +44,7 @@ export const Route = createFileRoute('/about')({
         },
         {
           property: 'og:site_name',
-          content: 'Is Open Next 16 Yet?',
+          content: SITE_NAME,
         },
         {
           property: 'og:locale',
@@ -53,7 +52,7 @@ export const Route = createFileRoute('/about')({
         },
         {
           property: 'og:image',
-          content: `${baseUrl}/og-image.png`, // Create a 1200x630px image for social previews
+          content: `${BASE_URL}/og-image.png`, // Create a 1200x630px image for social previews
         },
         {
           property: 'og:image:width',
@@ -83,7 +82,7 @@ export const Route = createFileRoute('/about')({
         },
         {
           name: 'twitter:image',
-          content: `${baseUrl}/og-image.png`, // Create a 1200x630px image for social previews
+          content: `${BASE_URL}/og-image.png`, // Create a 1200x630px image for social previews
         },
         {
           name: 'twitter:url',
@@ -91,7 +90,7 @@ export const Route = createFileRoute('/about')({
         },
         {
           name: 'twitter:site',
-          content: '@opennextjs', // Update if you have a Twitter handle
+          content: TWITTER_HANDLE,
         },
       ],
       links: [
