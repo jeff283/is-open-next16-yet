@@ -3,9 +3,9 @@ import {
   PACKAGE_JSON_URL,
   GITHUB_ISSUE_URL,
   TARGET_VERSION,
-  FALLBACK_ISSUE_DATE,
+  ISSUE_CREATED_AT,
 } from './constants'
-import type { VersionInfo } from './types'
+import type { VersionInfo, IssueDates } from './types'
 
 export const getOpenNextVersion = async (): Promise<VersionInfo> => {
   try {
@@ -57,7 +57,40 @@ export const getOpenNextVersion = async (): Promise<VersionInfo> => {
   }
 }
 
-export const getDaysSinceIssueCreation = async (): Promise<number> => {
+const calculateDaysSince = (dateString: string | null): number | null => {
+  if (!dateString) return null
+
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) {
+    console.error(`Invalid date format: ${dateString}`)
+    return null
+  }
+
+  const now = new Date()
+  const daysSince = Math.floor(
+    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
+  )
+
+  return daysSince >= 0 ? daysSince : null
+}
+
+export const getIssueDates = async (): Promise<IssueDates> => {
+  // Calculate days since creation using the constant
+  const createdAt = new Date(ISSUE_CREATED_AT)
+
+  if (isNaN(createdAt.getTime())) {
+    console.error(`Invalid creation date: ${ISSUE_CREATED_AT}`)
+    throw new Error(`Invalid creation date format: ${ISSUE_CREATED_AT}`)
+  }
+
+  const now = new Date()
+  const daysSinceCreation = Math.floor(
+    (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24),
+  )
+
+  // If date is in the future, return 0 (shouldn't happen for creation dates)
+  const validDaysSinceCreation = daysSinceCreation >= 0 ? daysSinceCreation : 0
+
   try {
     const response = await fetch(GITHUB_ISSUE_URL, {
       headers: {
@@ -77,34 +110,24 @@ export const getDaysSinceIssueCreation = async (): Promise<number> => {
       throw new Error('Invalid response: expected JSON object')
     }
 
-    if (!data.created_at || typeof data.created_at !== 'string') {
-      throw new Error('Missing or invalid created_at field in issue data')
+    const updatedAt = data.updated_at || null
+    const closedAt = data.closed_at || null
+    const isClosed = !!closedAt
+
+    return {
+      daysSinceIssueCreation: validDaysSinceCreation,
+      daysSinceIssueUpdate: calculateDaysSince(updatedAt),
+      daysSinceIssueClose: calculateDaysSince(closedAt),
+      isClosed,
     }
-
-    const createdAt = new Date(data.created_at)
-
-    if (isNaN(createdAt.getTime())) {
-      throw new Error(`Invalid date format: ${data.created_at}`)
-    }
-
-    const now = new Date()
-    const daysSince = Math.floor(
-      (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24),
-    )
-
-    if (daysSince < 0) {
-      throw new Error('Calculated days is negative (future date)')
-    }
-
-    return daysSince
   } catch (error) {
-    console.error('Error fetching days since issue creation:', error)
-    // Return fallback value - approximate based on issue creation date (Nov 4, 2024)
-    const fallbackDate = new Date(FALLBACK_ISSUE_DATE)
-    const now = new Date()
-    const fallbackDays = Math.floor(
-      (now.getTime() - fallbackDate.getTime()) / (1000 * 60 * 60 * 24),
-    )
-    return fallbackDays > 0 ? fallbackDays : 0
+    console.error('Error fetching issue dates:', error)
+    // Return fallback values - we still have creation date from constant
+    return {
+      daysSinceIssueCreation: validDaysSinceCreation,
+      daysSinceIssueUpdate: null,
+      daysSinceIssueClose: null,
+      isClosed: false,
+    }
   }
 }

@@ -7,6 +7,9 @@ export const generateHomePageMeta = (data: LoaderData | undefined) => {
     versionNumber: 15,
     version: '15.x.x',
     daysSinceIssueCreation: 0,
+    daysSinceIssueUpdate: null,
+    daysSinceIssueClose: null,
+    isClosed: false,
   }
 
   const {

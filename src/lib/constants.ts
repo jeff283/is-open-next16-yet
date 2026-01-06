@@ -8,8 +8,8 @@ export const GITHUB_ISSUE_URL =
 // Version configuration
 export const TARGET_VERSION = 16
 
-// Fallback issue creation date (Nov 4, 2025)
-export const FALLBACK_ISSUE_DATE = '2025-11-04'
+// Issue creation date (fixed - Nov 4, 2025)
+export const ISSUE_CREATED_AT = '2025-11-04T10:55:23Z'
 
 // Site configuration
 export const SITE_NAME = 'Is Open Next 16 Yet?'

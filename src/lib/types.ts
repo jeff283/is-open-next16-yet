@@ -5,6 +5,11 @@ export interface VersionInfo {
   error?: string
 }
 
-export interface LoaderData extends VersionInfo {
+export interface IssueDates {
   daysSinceIssueCreation: number
+  daysSinceIssueUpdate: number | null
+  daysSinceIssueClose: number | null
+  isClosed: boolean
 }
+
+export interface LoaderData extends VersionInfo, IssueDates {}

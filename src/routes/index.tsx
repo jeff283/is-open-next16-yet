@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { getOpenNextVersion, getDaysSinceIssueCreation } from '../lib/api'
+import { getOpenNextVersion, getIssueDates } from '../lib/api'
 import { generateHomePageMeta } from '../lib/seo'
 import { TARGET_VERSION } from '../lib/constants'
 import type { LoaderData } from '../lib/types'
@@ -7,14 +7,14 @@ import type { LoaderData } from '../lib/types'
 export const Route = createFileRoute('/')({
   loader: async (): Promise<LoaderData> => {
     try {
-      const [openNextVersion, daysSinceIssueCreation] = await Promise.all([
+      const [openNextVersion, issueDates] = await Promise.all([
         getOpenNextVersion(),
-        getDaysSinceIssueCreation(),
+        getIssueDates(),
       ])
 
       return {
         ...openNextVersion,
-        daysSinceIssueCreation,
+        ...issueDates,
       }
     } catch (error) {
       console.error('Error in loader:', error)
@@ -24,6 +24,9 @@ export const Route = createFileRoute('/')({
         versionNumber: 15,
         version: '15.x.x (error loading)',
         daysSinceIssueCreation: 0,
+        daysSinceIssueUpdate: null,
+        daysSinceIssueClose: null,
+        isClosed: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       }
     }
@@ -40,6 +43,9 @@ function App() {
     versionNumber,
     version,
     daysSinceIssueCreation,
+    daysSinceIssueUpdate,
+    daysSinceIssueClose,
+    isClosed,
     error,
   } = Route.useLoaderData()
   return (
@@ -114,7 +120,11 @@ function App() {
           </p>
           <p className="text-xs text-black mt-1">
             It's been {daysSinceIssueCreation} days since the issue was created
-            and still no Next.js 16 support
+            {daysSinceIssueUpdate !== null &&
+              ` and ${daysSinceIssueUpdate} days since last update`}
+            {isClosed && daysSinceIssueClose !== null
+              ? ` (closed ${daysSinceIssueClose} days ago)`
+              : ' and still no Next.js 16 support'}
           </p>
         </div>
 
