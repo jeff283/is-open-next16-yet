@@ -8,9 +8,9 @@ export const packageJsonSchema = z.object({
 
 // Schema for GitHub issue API response
 export const githubIssueSchema = z.object({
-  created_at: z.string().datetime().optional(),
-  updated_at: z.string().datetime().nullable().optional(),
-  closed_at: z.string().datetime().nullable().optional(),
+  created_at: z.iso.datetime().optional(),
+  updated_at: z.iso.datetime().nullable().optional(),
+  closed_at: z.iso.datetime().nullable().optional(),
 })
 
 // Schema for version string (e.g., "15.0.0", "16.1.2")
@@ -28,15 +28,12 @@ export const versionStringSchema = z
   )
 
 // Schema for ISO date string validation
-export const isoDateStringSchema = z
-  .string()
-  .datetime()
-  .refine(
-    (val) => {
-      const date = new Date(val)
-      return !isNaN(date.getTime())
-    },
-    {
-      message: 'Invalid date format',
-    },
-  )
+export const isoDateStringSchema = z.iso.datetime().refine(
+  (val) => {
+    const date = new Date(val)
+    return !isNaN(date.getTime())
+  },
+  {
+    message: 'Invalid date format',
+  },
+)
