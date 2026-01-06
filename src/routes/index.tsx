@@ -26,13 +26,30 @@ const getOpenNextVersion = async () => {
   }
   return responseData
 }
+
+const issueLink =
+  'https://api.github.com/repos/opennextjs/opennextjs-cloudflare/issues/972'
+const getDaysSinceIssueCreation = async () => {
+  const response = await fetch(issueLink)
+  const data = await response.json()
+  const createdAt = new Date(data.created_at)
+  const now = new Date()
+  return Math.floor(
+    (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24),
+  )
+}
 export const Route = createFileRoute('/')({
-  loader: () => getOpenNextVersion(),
+  loader: async () => {
+    const openNextVersion = await getOpenNextVersion()
+    const daysSinceIssueCreation = await getDaysSinceIssueCreation()
+    return { ...openNextVersion, daysSinceIssueCreation }
+  },
   component: App,
 })
 
 function App() {
-  const { isOpenNext16Yet, versionNumber, version } = Route.useLoaderData()
+  const { isOpenNext16Yet, versionNumber, version, daysSinceIssueCreation } =
+    Route.useLoaderData()
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-white">
       <div className="w-full max-w-2xl">
@@ -95,7 +112,8 @@ function App() {
             Next.js 16 introduces many new features
           </p>
           <p className="text-xs text-black mt-1">
-            It's been 4 months and still no Next.js 16 support
+            It's been {daysSinceIssueCreation} days since the issue was created
+            and still no Next.js 16 support
           </p>
         </div>
       </div>
