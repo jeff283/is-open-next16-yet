@@ -16,5 +16,6 @@ export const SITE_NAME = 'Is Open Next 16 Yet?'
 export const TWITTER_HANDLE = '@opennextjs'
 
 // Base URL - update this when you deploy
-// export const BASE_URL = 'https://is-open-next16-yet.pages.dev'
-export const BASE_URL = 'http://localhost:3000'
+export const BASE_URL =
+  'https://is-open-next16-yet.jgichuki-njoroge.workers.dev'
+// export const BASE_URL = 'http://localhost:3000'
