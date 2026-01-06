@@ -1,4 +1,10 @@
-import { packageJsonSchema } from './schemas'
+import { z } from 'zod'
+import {
+  packageJsonSchema,
+  githubIssueSchema,
+  versionStringSchema,
+  isoDateStringSchema,
+} from './schemas'
 import {
   PACKAGE_JSON_URL,
   GITHUB_ISSUE_URL,
@@ -23,27 +29,20 @@ export const getOpenNextVersion = async (): Promise<VersionInfo> => {
 
     const data = await response.json()
 
-    if (!data || typeof data !== 'object') {
-      throw new Error('Invalid response: expected JSON object')
-    }
-
+    // Validate package.json structure with Zod
     const parsed = packageJsonSchema.parse(data)
     const version = parsed.dependencies.next
 
-    if (!version || typeof version !== 'string') {
-      throw new Error('Invalid version format in package.json')
-    }
+    // Validate version string format with Zod
+    const validatedVersion = versionStringSchema.parse(version)
 
-    const versionNumber = parseInt(version.split('.')[0], 10)
-
-    if (isNaN(versionNumber)) {
-      throw new Error(`Could not parse version number from: ${version}`)
-    }
+    // Extract major version number (already validated by Zod)
+    const versionNumber = parseInt(validatedVersion.split('.')[0], 10)
 
     return {
       isOpenNext16Yet: versionNumber >= TARGET_VERSION,
       versionNumber,
-      version,
+      version: validatedVersion,
     }
   } catch (error) {
     console.error('Error fetching OpenNextJS version:', error)
@@ -52,7 +51,12 @@ export const getOpenNextVersion = async (): Promise<VersionInfo> => {
       isOpenNext16Yet: false,
       versionNumber: 15,
       version: '15.x.x (error loading)',
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error:
+        error instanceof z.ZodError
+          ? error.issues.map((issue) => issue.message).join(', ')
+          : error instanceof Error
+            ? error.message
+            : 'Unknown error',
     }
   }
 }
@@ -60,36 +64,46 @@ export const getOpenNextVersion = async (): Promise<VersionInfo> => {
 const calculateDaysSince = (dateString: string | null): number | null => {
   if (!dateString) return null
 
-  const date = new Date(dateString)
-  if (isNaN(date.getTime())) {
-    console.error(`Invalid date format: ${dateString}`)
+  try {
+    // Validate date string with Zod
+    const validatedDate = isoDateStringSchema.parse(dateString)
+    const date = new Date(validatedDate)
+
+    const now = new Date()
+    const daysSince = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
+    )
+
+    return daysSince >= 0 ? daysSince : null
+  } catch (error) {
+    console.error(`Invalid date format: ${dateString}`, error)
     return null
   }
-
-  const now = new Date()
-  const daysSince = Math.floor(
-    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
-  )
-
-  return daysSince >= 0 ? daysSince : null
 }
 
 export const getIssueDates = async (): Promise<IssueDates> => {
-  // Calculate days since creation using the constant
-  const createdAt = new Date(ISSUE_CREATED_AT)
+  // Validate and calculate days since creation using the constant
+  let validDaysSinceCreation = 0
 
-  if (isNaN(createdAt.getTime())) {
-    console.error(`Invalid creation date: ${ISSUE_CREATED_AT}`)
-    throw new Error(`Invalid creation date format: ${ISSUE_CREATED_AT}`)
+  try {
+    const validatedCreatedAt = isoDateStringSchema.parse(ISSUE_CREATED_AT)
+    const createdAt = new Date(validatedCreatedAt)
+    const now = new Date()
+    const daysSinceCreation = Math.floor(
+      (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24),
+    )
+    // If date is in the future, return 0 (shouldn't happen for creation dates)
+    validDaysSinceCreation = daysSinceCreation >= 0 ? daysSinceCreation : 0
+  } catch (error) {
+    console.error(`Invalid creation date: ${ISSUE_CREATED_AT}`, error)
+    throw new Error(
+      `Invalid creation date format: ${ISSUE_CREATED_AT}. ${
+        error instanceof z.ZodError
+          ? error.issues.map((issue) => issue.message).join(', ')
+          : 'Unknown error'
+      }`,
+    )
   }
-
-  const now = new Date()
-  const daysSinceCreation = Math.floor(
-    (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24),
-  )
-
-  // If date is in the future, return 0 (shouldn't happen for creation dates)
-  const validDaysSinceCreation = daysSinceCreation >= 0 ? daysSinceCreation : 0
 
   try {
     const response = await fetch(GITHUB_ISSUE_URL, {
@@ -106,12 +120,11 @@ export const getIssueDates = async (): Promise<IssueDates> => {
 
     const data = await response.json()
 
-    if (!data || typeof data !== 'object') {
-      throw new Error('Invalid response: expected JSON object')
-    }
+    // Validate GitHub issue response with Zod
+    const parsed = githubIssueSchema.parse(data)
 
-    const updatedAt = data.updated_at || null
-    const closedAt = data.closed_at || null
+    const updatedAt = parsed.updated_at || null
+    const closedAt = parsed.closed_at || null
     const isClosed = !!closedAt
 
     return {
