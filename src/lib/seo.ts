@@ -1,5 +1,5 @@
-import { BASE_URL, SITE_NAME, TWITTER_HANDLE } from './constants'
-import type { LoaderData } from './types'
+import { BASE_URL, SITE_NAME, TWITTER_HANDLE } from '@/lib/constants'
+import type { LoaderData } from '@/lib/types'
 
 export const generateHomePageMeta = (data: LoaderData | undefined) => {
   const fallbackData: LoaderData = {
@@ -12,11 +12,8 @@ export const generateHomePageMeta = (data: LoaderData | undefined) => {
     isClosed: false,
   }
 
-  const {
-    isOpenNext16Yet,
-    version,
-    daysSinceIssueCreation,
-  } = data ?? fallbackData
+  const { isOpenNext16Yet, version, daysSinceIssueCreation } =
+    data ?? fallbackData
 
   const status = isOpenNext16Yet ? 'YES' : 'NO'
   const description = isOpenNext16Yet

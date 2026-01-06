@@ -4,14 +4,14 @@ import {
   githubIssueSchema,
   versionStringSchema,
   isoDateStringSchema,
-} from './schemas'
+} from '@/lib/schemas'
 import {
   PACKAGE_JSON_URL,
   GITHUB_ISSUE_URL,
   TARGET_VERSION,
   ISSUE_CREATED_AT,
-} from './constants'
-import type { VersionInfo, IssueDates } from './types'
+} from '@/lib/constants'
+import type { VersionInfo, IssueDates } from '@/lib/types'
 
 export const getOpenNextVersion = async (): Promise<VersionInfo> => {
   try {

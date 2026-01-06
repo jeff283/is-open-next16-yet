@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { BASE_URL, SITE_NAME, TWITTER_HANDLE } from '../lib/constants'
+import { BASE_URL, SITE_NAME, TWITTER_HANDLE } from '@/lib/constants'
 
 export const Route = createFileRoute('/about')({
   head: () => {
