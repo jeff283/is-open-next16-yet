@@ -1,5 +1,7 @@
 # Is Open Next 16 Yet
 
+[![wakatime](https://wakatime.com/badge/user/f09b39ba-bf5c-41c6-a7a2-7d45bd7661ff/project/a51ee6ab-b463-46ab-be0f-197a11fb8772.svg)](https://wakatime.com/badge/user/f09b39ba-bf5c-41c6-a7a2-7d45bd7661ff/project/a51ee6ab-b463-46ab-be0f-197a11fb8772)
+
 A simple, clean web application that tracks whether [OpenNextJS Cloudflare](https://github.com/opennextjs/opennextjs-cloudflare) has added support for Next.js 16 yet.
 
 ## Purpose
