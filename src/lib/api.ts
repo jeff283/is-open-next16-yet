@@ -1,7 +1,7 @@
 import { z } from 'zod'
+import { gte, major } from 'semver'
 import type { VersionInfo } from '@/lib/types'
 import {
-  getMajorVersionNumber,
   npmPackageLatestSchema,
   packageJsonSchema,
   versionStringSchema,
@@ -10,7 +10,7 @@ import {
   NEXT_LATEST_REGISTRY_URL,
   PACKAGE_JSON_URL,
 } from '@/lib/constants'
-import { compareSemver, getVersionsDownToMajor } from '@/lib/lib'
+import { getVersionsDownToMajor } from '@/lib/lib'
 
 export const getLatestNextVersion = async (): Promise<VersionInfo | null> => {
   const res = await fetch(NEXT_LATEST_REGISTRY_URL)
@@ -22,11 +22,9 @@ export const getLatestNextVersion = async (): Promise<VersionInfo | null> => {
   const data = await res.json()
   const parsed = npmPackageLatestSchema.parse(data)
 
-  const majorVersion = getMajorVersionNumber(parsed.version)
-
   return {
     version: parsed.version,
-    majorVersion,
+    majorVersion: major(parsed.version),
   }
 }
 
@@ -47,13 +45,11 @@ export const getLatestOpenNextVersion =
       }
 
       const data = await res.json()
-
       const parsed = packageJsonSchema.parse(data)
       const version = versionStringSchema.parse(parsed.dependencies.next)
-      const majorVersion = getMajorVersionNumber(version)
 
       return {
-        majorVersion,
+        majorVersion: major(version),
         version,
       }
     } catch (error) {
@@ -72,7 +68,7 @@ export const getVercelVersionsSinceOpenNext = async (
 ): Promise<Array<string>> => {
   try {
     const all = await getVersionsDownToMajor('next', openNextMajorVersion)
-    return all.filter((v) => compareSemver(v, openNextFullVersion) >= 0)
+    return all.filter((v) => gte(v, openNextFullVersion))
   } catch (error) {
     console.error('Error fetching Vercel Next.js version history:', error)
     return []
@@ -99,20 +95,18 @@ export const getOpenNextVersion = async (): Promise<{
     }
 
     const data = await response.json()
-
     const parsed = packageJsonSchema.parse(data)
     const validatedVersion = versionStringSchema.parse(parsed.dependencies.next)
-    const versionNumber = getMajorVersionNumber(validatedVersion)
 
     return {
-      versionNumber,
+      versionNumber: major(validatedVersion),
       version: validatedVersion,
     }
   } catch (error) {
     console.error('Error fetching OpenNextJS version:', error)
     return {
-      versionNumber: 15,
-      version: '15.x.x (error loading)',
+      versionNumber: 0,
+      version: 'error',
       error:
         error instanceof z.ZodError
           ? error.issues.map((issue) => issue.message).join(', ')
