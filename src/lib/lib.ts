@@ -16,7 +16,9 @@ export async function getVersionsDownToMajor(
   packageName: string,
   minMajor: number,
 ): Promise<Array<string>> {
-  const res = await fetch(`https://registry.npmjs.org/${packageName}`)
+  const res = await fetch(`https://registry.npmjs.org/${packageName}`, {
+    headers: { Accept: 'application/vnd.npm.install-v1+json' },
+  })
 
   if (!res.ok) {
     throw new Error(
