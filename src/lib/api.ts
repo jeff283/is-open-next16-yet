@@ -11,7 +11,7 @@ import {
   PACKAGE_JSON_URL,
   TARGET_VERSION,
 } from '@/lib/constants'
-import { getVersionsDownToMajor } from '@/lib/lib'
+import { compareSemver, getVersionsDownToMajor } from '@/lib/lib'
 
 export const getLatestNextVersion = async (): Promise<VersionInfo | null> => {
   const res = await fetch(NEXT_LATEST_REGISTRY_URL)
@@ -65,13 +65,15 @@ export const getLatestOpenNextVersion =
 
 /**
  * Returns all stable Vercel Next.js versions from the latest down to
- * (and including) the major version that OpenNextJS currently supports.
+ * (and including) the exact version OpenNextJS currently supports.
  */
 export const getVercelVersionsSinceOpenNext = async (
   openNextMajorVersion: number,
+  openNextFullVersion: string,
 ): Promise<Array<string>> => {
   try {
-    return await getVersionsDownToMajor('next', openNextMajorVersion)
+    const all = await getVersionsDownToMajor('next', openNextMajorVersion)
+    return all.filter((v) => compareSemver(v, openNextFullVersion) >= 0)
   } catch (error) {
     console.error('Error fetching Vercel Next.js version history:', error)
     return []

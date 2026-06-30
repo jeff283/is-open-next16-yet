@@ -46,7 +46,7 @@ export async function getVersionsDownToMajor(
  * Basic semver comparator (assumes no prerelease tags, since we filter those out).
  * Returns positive if a > b, negative if a < b, 0 if equal.
  */
-function compareSemver(a: string, b: string): number {
+export function compareSemver(a: string, b: string): number {
   const pa = a.split('.').map(Number)
   const pb = b.split('.').map(Number)
 
