@@ -3,3 +3,7 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
   workerd: true
+
+peerDependencyRules:
+  allowedVersions:
+    typescript: "6"
