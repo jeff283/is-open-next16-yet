@@ -10,7 +10,7 @@ interface NpmRegistryResponse {
  * @param minMajor - lowest major version to include (e.g. 15 includes 15.x.x but stops before 14.x.x)
  * @returns array of version strings, newest first
  */
-async function getVersionsDownToMajor(
+export async function getVersionsDownToMajor(
   packageName: string,
   minMajor: number,
 ): Promise<Array<string>> {
