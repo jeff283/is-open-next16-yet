@@ -1,28 +1,32 @@
 import type { LoaderData } from '@/lib/types'
-import { BASE_URL, SITE_NAME, TARGET_VERSION, TWITTER_HANDLE } from '@/lib/constants'
+import { BASE_URL, SITE_NAME, TWITTER_HANDLE } from '@/lib/constants'
 
 export const generateHomePageMeta = (data: LoaderData | undefined) => {
   const fallbackData: LoaderData = {
-    isOpenNext16Yet: false,
-    versionNumber: 15,
-    version: '15.x.x',
-    latestNextVersion: `${TARGET_VERSION}.x.x`,
-    latestNextMajorVersion: TARGET_VERSION,
+    versionNumber: 0,
+    version: 'unknown',
+    latestNextVersion: 'unknown',
+    latestNextMajorVersion: 0,
+    vercelVersionHistory: [],
   }
 
-  const { isOpenNext16Yet, version, latestNextVersion } = data ?? fallbackData
+  const { version, latestNextVersion, versionNumber, latestNextMajorVersion } =
+    data ?? fallbackData
 
-  const status = isOpenNext16Yet ? 'YES' : 'NO'
-  const description = isOpenNext16Yet
-    ? `OpenNextJS Cloudflare is now supporting Next.js ${version}. It matches Vercel's latest release (${latestNextVersion}).`
-    : `OpenNextJS Cloudflare is still on Next.js ${version}, while Vercel's latest is ${latestNextVersion}. Not yet supporting Next.js ${TARGET_VERSION}.`
+  const exactMatch = version === latestNextVersion
+  const majorMatch = versionNumber === latestNextMajorVersion
+
+  const status = exactMatch ? 'Exact match' : majorMatch ? 'Close' : 'Behind'
+  const description = exactMatch
+    ? `OpenNextJS Cloudflare and Vercel Next.js are both on ${version}.`
+    : `OpenNextJS Cloudflare is on ${version}, Vercel's latest is ${latestNextVersion}.`
 
   const siteUrl = BASE_URL
 
   return {
     meta: [
       {
-        title: `Is OpenNextJS Cloudflare Using Next.js ${TARGET_VERSION}? ${status}`,
+        title: `OpenNextJS Cloudflare vs Vercel Next.js | ${status}`,
       },
       {
         name: 'description',
@@ -43,7 +47,7 @@ export const generateHomePageMeta = (data: LoaderData | undefined) => {
       },
       {
         property: 'og:title',
-        content: `Is OpenNextJS Cloudflare Using Next.js ${TARGET_VERSION}? ${status}`,
+        content: `OpenNextJS Cloudflare vs Vercel Next.js | ${status}`,
       },
       {
         property: 'og:description',
@@ -79,7 +83,7 @@ export const generateHomePageMeta = (data: LoaderData | undefined) => {
       },
       {
         property: 'og:image:alt',
-        content: `OpenNextJS Cloudflare Next.js ${TARGET_VERSION} Status: ${status}`,
+        content: `OpenNextJS Cloudflare vs Vercel Next.js: ${status}`,
       },
       {
         name: 'twitter:card',
@@ -87,7 +91,7 @@ export const generateHomePageMeta = (data: LoaderData | undefined) => {
       },
       {
         name: 'twitter:title',
-        content: `Is OpenNextJS Cloudflare Using Next.js ${TARGET_VERSION}? ${status}`,
+        content: `OpenNextJS Cloudflare vs Vercel Next.js | ${status}`,
       },
       {
         name: 'twitter:description',

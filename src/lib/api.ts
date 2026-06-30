@@ -9,7 +9,6 @@ import {
 import {
   NEXT_LATEST_REGISTRY_URL,
   PACKAGE_JSON_URL,
-  TARGET_VERSION,
 } from '@/lib/constants'
 import { compareSemver, getVersionsDownToMajor } from '@/lib/lib'
 
@@ -81,7 +80,6 @@ export const getVercelVersionsSinceOpenNext = async (
 }
 
 export const getOpenNextVersion = async (): Promise<{
-  isOpenNext16Yet: boolean
   versionNumber: number
   version: string
   error?: string
@@ -107,14 +105,12 @@ export const getOpenNextVersion = async (): Promise<{
     const versionNumber = getMajorVersionNumber(validatedVersion)
 
     return {
-      isOpenNext16Yet: versionNumber >= TARGET_VERSION,
       versionNumber,
       version: validatedVersion,
     }
   } catch (error) {
     console.error('Error fetching OpenNextJS version:', error)
     return {
-      isOpenNext16Yet: false,
       versionNumber: 15,
       version: '15.x.x (error loading)',
       error:

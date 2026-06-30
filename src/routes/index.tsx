@@ -30,11 +30,10 @@ export const Route = createFileRoute('/')({
     } catch (error) {
       console.error('Error in loader:', error)
       return {
-        isOpenNext16Yet: false,
-        versionNumber: 15,
-        version: '15.x.x (error loading)',
-        latestNextVersion: `${TARGET_VERSION}.x.x (error loading)`,
-        latestNextMajorVersion: TARGET_VERSION,
+        versionNumber: 0,
+        version: 'error',
+        latestNextVersion: 'error',
+        latestNextMajorVersion: 0,
         vercelVersionHistory: [],
         error: error instanceof Error ? error.message : 'Unknown error',
       }
@@ -182,14 +181,8 @@ function VersionHistoryList({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 function App() {
-  const {
-    versionNumber,
-    version,
-    latestNextVersion,
-    latestNextMajorVersion,
-    vercelVersionHistory,
-    error,
-  } = Route.useLoaderData()
+  const { versionNumber, version, latestNextVersion, latestNextMajorVersion, vercelVersionHistory, error } =
+    Route.useLoaderData()
 
   const exactMatch = version === latestNextVersion
   const majorMatch = versionNumber === latestNextMajorVersion

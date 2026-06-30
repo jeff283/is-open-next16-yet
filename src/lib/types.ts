@@ -5,7 +5,6 @@ export interface VersionInfo {
 }
 
 export interface LoaderData {
-  isOpenNext16Yet: boolean
   versionNumber: number
   version: string
   latestNextVersion: string
