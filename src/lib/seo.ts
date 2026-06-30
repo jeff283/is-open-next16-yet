@@ -1,5 +1,5 @@
-import { BASE_URL, SITE_NAME, TWITTER_HANDLE } from '@/lib/constants'
 import type { LoaderData } from '@/lib/types'
+import { BASE_URL, SITE_NAME, TWITTER_HANDLE } from '@/lib/constants'
 
 export const generateHomePageMeta = (data: LoaderData | undefined) => {
   const fallbackData: LoaderData = {
