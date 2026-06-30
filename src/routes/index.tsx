@@ -123,6 +123,7 @@ function VersionHistoryList({
   if (versions.length === 0) return null
 
   const rows = buildRows(versions)
+  const firstVersion = versions.at(0)
   const lastVersion = versions.at(-1)
 
   return (
@@ -154,18 +155,25 @@ function VersionHistoryList({
           )
         }
 
-        const isMatch = row.value === lastVersion
+        const isLatestVercel = row.value === firstVersion
+        const isOpenNext = row.value === lastVersion
+
+        const rowBg = isLatestVercel
+          ? 'bg-green-100'
+          : isOpenNext
+            ? 'bg-orange-100'
+            : 'bg-white'
 
         return (
           <div
             key={row.value}
-            className={`grid grid-cols-2 divide-x-2 divide-black border-t-2 border-black ${isMatch ? 'bg-orange-100' : 'bg-white'}`}
+            className={`grid grid-cols-2 divide-x-2 divide-black border-t-2 border-black ${rowBg}`}
           >
             <div className="px-6 py-3">
               <p className="font-mono text-sm font-bold text-black">{row.value}</p>
             </div>
             <div className="px-6 py-3">
-              {isMatch && (
+              {isOpenNext && (
                 <p className="font-mono text-sm font-bold text-black">
                   {openNextVersion}
                 </p>
