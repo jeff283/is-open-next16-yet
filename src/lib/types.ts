@@ -1,6 +1,5 @@
 export interface VersionInfo {
-  isOpenNext16Yet: boolean
-  versionNumber: number
+  majorVersion: number
   version: string
   error?: string
 }
