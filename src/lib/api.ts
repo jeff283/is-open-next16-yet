@@ -1,77 +1,51 @@
 import { z } from 'zod'
-import { gte, major } from 'semver'
-import type { VersionInfo } from '@/lib/types'
+import { major, prerelease, rcompare } from 'semver'
 import {
-  npmPackageLatestSchema,
   packageJsonSchema,
   versionStringSchema,
 } from '@/lib/schemas'
-import {
-  NEXT_LATEST_REGISTRY_URL,
-  PACKAGE_JSON_URL,
-} from '@/lib/constants'
-import { getVersionsDownToMajor } from '@/lib/lib'
+import { PACKAGE_JSON_URL } from '@/lib/constants'
 
-export const getLatestNextVersion = async (): Promise<VersionInfo | null> => {
-  const res = await fetch(NEXT_LATEST_REGISTRY_URL)
-  if (!res.ok) {
-    throw new Error(
-      `Failed to fetch latest Next version: ${res.status} ${res.statusText}`,
-    )
-  }
-  const data = await res.json()
-  const parsed = npmPackageLatestSchema.parse(data)
-
-  return {
-    version: parsed.version,
-    majorVersion: major(parsed.version),
-  }
+interface NpmPackument {
+  'dist-tags': { latest: string }
+  versions: Record<string, unknown>
 }
 
-export const getLatestOpenNextVersion =
-  async (): Promise<VersionInfo | null> => {
-    try {
-      const res = await fetch(PACKAGE_JSON_URL, {
-        headers: {
-          Accept: 'application/json',
-          'User-Agent': 'jeff283/is-open-next16-yet',
-        },
-      })
-
-      if (!res.ok) {
-        throw new Error(
-          `Failed to fetch package.json: ${res.status} ${res.statusText}`,
-        )
-      }
-
-      const data = await res.json()
-      const parsed = packageJsonSchema.parse(data)
-      const version = versionStringSchema.parse(parsed.dependencies.next)
-
-      return {
-        majorVersion: major(version),
-        version,
-      }
-    } catch (error) {
-      console.error('Error fetching OpenNextJS version:', error)
-      return null
-    }
-  }
-
 /**
- * Returns all stable Vercel Next.js versions from the latest down to
- * (and including) the exact version OpenNextJS currently supports.
+ * Single abbreviated packument fetch — returns the latest Vercel Next.js
+ * version and all stable versions sorted newest-first.
+ * Using the install-v1 Accept header keeps the payload small (~10x lighter
+ * than the full packument).
  */
-export const getVercelVersionsSinceOpenNext = async (
-  openNextMajorVersion: number,
-  openNextFullVersion: string,
-): Promise<Array<string>> => {
+export const getNextNpmData = async (): Promise<{
+  latestVersion: string
+  latestMajorVersion: number
+  allStableVersions: Array<string>
+} | null> => {
   try {
-    const all = await getVersionsDownToMajor('next', openNextMajorVersion)
-    return all.filter((v) => gte(v, openNextFullVersion))
+    const res = await fetch('https://registry.npmjs.org/next', {
+      headers: { Accept: 'application/vnd.npm.install-v1+json' },
+    })
+
+    if (!res.ok) {
+      throw new Error(`npm registry responded ${res.status} ${res.statusText}`)
+    }
+
+    const data: NpmPackument = await res.json()
+    const latestVersion = data['dist-tags'].latest
+
+    const allStableVersions = Object.keys(data.versions)
+      .filter((v) => prerelease(v) === null)
+      .sort(rcompare)
+
+    return {
+      latestVersion,
+      latestMajorVersion: major(latestVersion),
+      allStableVersions,
+    }
   } catch (error) {
-    console.error('Error fetching Vercel Next.js version history:', error)
-    return []
+    console.error('Error fetching Next.js npm data:', error)
+    return null
   }
 }
 
