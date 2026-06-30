@@ -14,7 +14,7 @@ export const generateHomePageMeta = (data: LoaderData | undefined) => {
 
   const status = isOpenNext16Yet ? 'YES' : 'NO'
   const description = isOpenNext16Yet
-    ? `OpenNextJS Cloudflare is now supporting Next.js ${version}! It's up to date with Vercel's latest (${latestNextVersion}). 🎉`
+    ? `OpenNextJS Cloudflare is now supporting Next.js ${version}. It matches Vercel's latest release (${latestNextVersion}).`
     : `OpenNextJS Cloudflare is still on Next.js ${version}, while Vercel's latest is ${latestNextVersion}. Not yet supporting Next.js ${TARGET_VERSION}.`
 
   const siteUrl = BASE_URL

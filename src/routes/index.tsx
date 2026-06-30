@@ -54,7 +54,7 @@ function App() {
         {error && (
           <div className="border-4 border-black p-4 mb-4 bg-yellow-100 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             <p className="text-sm font-bold text-black">
-              ⚠️ Unable to fetch latest data. Showing cached/fallback values.
+              Unable to fetch latest data. Showing cached/fallback values.
             </p>
           </div>
         )}
