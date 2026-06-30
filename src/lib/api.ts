@@ -18,6 +18,7 @@ export const getOpenNextVersion = async (): Promise<VersionInfo> => {
     const response = await fetch(PACKAGE_JSON_URL, {
       headers: {
         Accept: 'application/json',
+        'User-Agent': 'jeff283/is-open-next16-yet',
       },
     })
 
@@ -109,6 +110,7 @@ export const getIssueDates = async (): Promise<IssueDates> => {
     const response = await fetch(GITHUB_ISSUE_URL, {
       headers: {
         Accept: 'application/vnd.github.v3+json',
+        'User-Agent': 'jeff283/is-open-next16-yet',
       },
     })
 
