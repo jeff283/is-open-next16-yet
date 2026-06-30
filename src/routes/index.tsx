@@ -1,30 +1,26 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
+import { gte } from 'semver'
 import type { LoaderData } from '@/lib/types'
-import {
-  getLatestNextVersion,
-  getOpenNextVersion,
-  getVercelVersionsSinceOpenNext,
-} from '@/lib/api'
+import { getNextNpmData, getOpenNextVersion } from '@/lib/api'
 import { generateHomePageMeta } from '@/lib/seo'
-import { TARGET_VERSION } from '@/lib/constants'
 
 export const Route = createFileRoute('/')({
+  // Both fetches run in parallel — one GitHub call, one npm call
   loader: async (): Promise<LoaderData> => {
     try {
-      const [openNextVersion, latestNext] = await Promise.all([
+      const [openNext, nextNpm] = await Promise.all([
         getOpenNextVersion(),
-        getLatestNextVersion(),
+        getNextNpmData(),
       ])
 
-      const vercelVersionHistory = await getVercelVersionsSinceOpenNext(
-        openNextVersion.versionNumber,
-        openNextVersion.version,
-      )
+      const vercelVersionHistory = nextNpm
+        ? nextNpm.allStableVersions.filter((v) => gte(v, openNext.version))
+        : []
 
       return {
-        ...openNextVersion,
-        latestNextVersion: latestNext?.version ?? 'unknown',
-        latestNextMajorVersion: latestNext?.majorVersion ?? TARGET_VERSION,
+        ...openNext,
+        latestNextVersion: nextNpm?.latestVersion ?? 'unknown',
+        latestNextMajorVersion: nextNpm?.latestMajorVersion ?? 0,
         vercelVersionHistory,
       }
     } catch (error) {
@@ -39,11 +35,76 @@ export const Route = createFileRoute('/')({
       }
     }
   },
-  head: ({ loaderData }) => {
-    return generateHomePageMeta(loaderData)
-  },
+  // Cache loader result on the client — avoids refetch on every back-navigation
+  staleTime: 5 * 60 * 1000,
+  head: ({ loaderData }) => generateHomePageMeta(loaderData),
+  pendingComponent: PageSkeleton,
   component: App,
 })
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+
+function SkeletonBlock({ className }: { className?: string }) {
+  return (
+    <div className={`bg-gray-200 animate-pulse rounded-sm ${className ?? ''}`} />
+  )
+}
+
+function PageSkeleton() {
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 bg-white">
+      <div className="w-full max-w-2xl">
+
+        {/* Full Version card skeleton */}
+        <div className="border-4 border-black mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+          <div className="bg-black px-6 py-3">
+            <SkeletonBlock className="h-3 w-24 bg-gray-600" />
+          </div>
+          <div className="grid grid-cols-2 divide-x-4 divide-black">
+            {[0, 1].map((i) => (
+              <div key={i} className="p-5 bg-white text-center space-y-2">
+                <SkeletonBlock className="h-2 w-20 mx-auto" />
+                <SkeletonBlock className="h-6 w-24 mx-auto" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Version history table skeleton */}
+        <div className="border-4 border-black mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+          <div className="grid grid-cols-2 divide-x-4 divide-white bg-black">
+            {[0, 1].map((i) => (
+              <div key={i} className="px-6 py-3">
+                <SkeletonBlock className="h-2 w-20 bg-gray-600" />
+              </div>
+            ))}
+          </div>
+          {[0, 1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="grid grid-cols-2 divide-x-2 divide-black border-t-2 border-black"
+            >
+              <div className="px-6 py-3">
+                <SkeletonBlock className="h-4 w-16" />
+              </div>
+              <div className="px-6 py-3" />
+            </div>
+          ))}
+        </div>
+
+        {/* Match status card skeleton */}
+        <div className="border-4 border-black p-5 mb-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-gray-100 text-center space-y-2">
+          <SkeletonBlock className="h-2 w-24 mx-auto" />
+          <SkeletonBlock className="h-8 w-32 mx-auto" />
+        </div>
+
+        <div className="text-center">
+          <SkeletonBlock className="h-2 w-10 mx-auto" />
+        </div>
+      </div>
+    </div>
+  )
+}
 
 // ─── Shared display helpers ───────────────────────────────────────────────────
 
@@ -59,7 +120,7 @@ function VersionDisplay({ version }: { version: string }) {
   )
 }
 
-// ─── Unused (available for future use) ───────────────────────────────────────
+// ─── Available for future use ─────────────────────────────────────────────────
 
 export function MajorVersionCard({
   latestNextMajorVersion,
@@ -189,8 +250,14 @@ function VersionHistoryList({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 function App() {
-  const { versionNumber, version, latestNextVersion, latestNextMajorVersion, vercelVersionHistory, error } =
-    Route.useLoaderData()
+  const {
+    versionNumber,
+    version,
+    latestNextVersion,
+    latestNextMajorVersion,
+    vercelVersionHistory,
+    error,
+  } = Route.useLoaderData()
 
   const exactMatch = version === latestNextVersion
   const majorMatch = versionNumber === latestNextMajorVersion
@@ -201,11 +268,7 @@ function App() {
       ? 'bg-orange-300'
       : 'bg-red-300'
 
-  const statusLabel = exactMatch
-    ? 'Exact match'
-    : majorMatch
-      ? 'Close'
-      : 'Behind'
+  const statusLabel = exactMatch ? 'Exact match' : majorMatch ? 'Close' : 'Behind'
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-white">
