@@ -37,7 +37,6 @@ export const Route = createFileRoute('/')({
 
 function App() {
   const {
-    isOpenNext16Yet,
     versionNumber,
     version,
     latestNextVersion,
@@ -45,12 +44,24 @@ function App() {
     error,
   } = Route.useLoaderData()
 
-  const versionGap = latestNextMajorVersion - versionNumber
+  const exactMatch = version === latestNextVersion
+  const majorMatch = versionNumber === latestNextMajorVersion
+
+  const statusBg = exactMatch
+    ? 'bg-green-300'
+    : majorMatch
+      ? 'bg-orange-300'
+      : 'bg-red-300'
+
+  const statusLabel = exactMatch
+    ? 'Exact match'
+    : majorMatch
+      ? 'Close'
+      : 'Behind'
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-white">
       <div className="w-full max-w-2xl">
-
         {error && (
           <div className="border-4 border-black p-4 mb-4 bg-yellow-100 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             <p className="text-sm font-bold text-black">
@@ -59,83 +70,68 @@ function App() {
           </div>
         )}
 
-        {/* Hero Card */}
-        <div
-          className={`border-4 border-black p-8 mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] ${
-            isOpenNext16Yet ? 'bg-green-300' : 'bg-red-300'
-          }`}
-        >
-          <div className="text-center">
-            <p className="text-sm font-black uppercase tracking-widest text-black mb-2">
-              Is OpenNextJS Cloudflare
-            </p>
-            <h1 className="text-9xl font-black text-black leading-none mb-2">
-              {isOpenNext16Yet ? 'YES' : 'NO'}
-            </h1>
-            <p className="text-xl font-black text-black">
-              {isOpenNext16Yet
-                ? `supporting Next.js ${TARGET_VERSION}?`
-                : `supporting Next.js ${TARGET_VERSION} yet?`}
-            </p>
-          </div>
-        </div>
-
-        {/* Version Comparison Card */}
+        {/* Full Version Comparison */}
         <div className="border-4 border-black mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
           <div className="bg-black px-6 py-3">
             <p className="text-white font-black uppercase tracking-widest text-sm">
-              Version Comparison
+              Full Version
             </p>
           </div>
           <div className="grid grid-cols-2 divide-x-4 divide-black">
-            {/* Vercel / npm */}
-            <div className="p-6 bg-blue-100">
-              <p className="text-xs font-black uppercase tracking-widest text-black mb-3">
+            <div className="p-5 bg-white text-center">
+              <p className="text-xs font-black uppercase tracking-widest text-black mb-2">
                 Vercel Next.js
               </p>
-              <p className="text-5xl font-black text-black leading-none">
-                v{latestNextMajorVersion}
-              </p>
-              <p className="text-sm font-bold text-black mt-2 font-mono">
+              <p className="text-xl font-black text-black font-mono">
                 {latestNextVersion}
               </p>
-              <div className="mt-4 inline-block bg-black px-2 py-1">
-                <p className="text-xs font-black text-white uppercase">Latest</p>
-              </div>
             </div>
-
-            {/* OpenNextJS Cloudflare */}
-            <div className={`p-6 ${isOpenNext16Yet ? 'bg-green-100' : 'bg-red-100'}`}>
-              <p className="text-xs font-black uppercase tracking-widest text-black mb-3">
+            <div className="p-5 bg-white text-center">
+              <p className="text-xs font-black uppercase tracking-widest text-black mb-2">
                 OpenNextJS CF
               </p>
-              <p className="text-5xl font-black text-black leading-none">
-                v{versionNumber}
-              </p>
-              <p className="text-sm font-bold text-black mt-2 font-mono">
+              <p className="text-xl font-black text-black font-mono">
                 {version}
               </p>
-              <div className={`mt-4 inline-block px-2 py-1 border-2 border-black ${isOpenNext16Yet ? 'bg-green-300' : 'bg-red-300'}`}>
-                <p className="text-xs font-black text-black uppercase">
-                  {isOpenNext16Yet ? 'Up to date' : `${versionGap} behind`}
-                </p>
-              </div>
             </div>
           </div>
+        </div>
 
-          {/* Gap Indicator */}
-          {!isOpenNext16Yet && (
-            <div className="border-t-4 border-black bg-yellow-100 px-6 py-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-black text-black uppercase tracking-wide">
-                  Version gap
-                </span>
-                <span className="text-2xl font-black text-black">
-                  {versionGap} major {versionGap === 1 ? 'version' : 'versions'} behind
-                </span>
-              </div>
+        {/* Major Version Comparison */}
+        <div className="border-4 border-black mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+          <div className="bg-black px-6 py-3">
+            <p className="text-white font-black uppercase tracking-widest text-sm">
+              Major Version
+            </p>
+          </div>
+          <div className="grid grid-cols-2 divide-x-4 divide-black">
+            <div className="p-5 bg-white text-center">
+              <p className="text-xs font-black uppercase tracking-widest text-black mb-2">
+                Vercel Next.js
+              </p>
+              <p className="text-4xl font-black text-black">
+                {latestNextMajorVersion}
+              </p>
             </div>
-          )}
+            <div className="p-5 bg-white text-center">
+              <p className="text-xs font-black uppercase tracking-widest text-black mb-2">
+                OpenNextJS CF
+              </p>
+              <p className="text-4xl font-black text-black">
+                {versionNumber}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Match Status */}
+        <div
+          className={`border-4 border-black p-5 mb-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center ${statusBg}`}
+        >
+          <p className="text-xs font-black uppercase tracking-widest text-black mb-1">
+            Match Status
+          </p>
+          <p className="text-3xl font-black text-black">{statusLabel}</p>
         </div>
 
         {/* Footer */}
