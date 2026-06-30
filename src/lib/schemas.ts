@@ -6,13 +6,6 @@ export const packageJsonSchema = z.object({
   }),
 })
 
-// Schema for GitHub issue API response
-export const githubIssueSchema = z.object({
-  created_at: z.iso.datetime().optional(),
-  updated_at: z.iso.datetime().nullable().optional(),
-  closed_at: z.iso.datetime().nullable().optional(),
-})
-
 export const getMajorVersionNumber = (version: string): number =>
   parseInt(version.split('.')[0], 10)
 
@@ -29,17 +22,6 @@ export const versionStringSchema = z
       message: 'Invalid major version number',
     },
   )
-
-// Schema for ISO date string validation
-export const isoDateStringSchema = z.iso.datetime().refine(
-  (val) => {
-    const date = new Date(val)
-    return !isNaN(date.getTime())
-  },
-  {
-    message: 'Invalid date format',
-  },
-)
 
 export const npmPackageLatestSchema = z.object({
   name: z.string(),

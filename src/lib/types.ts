@@ -4,11 +4,11 @@ export interface VersionInfo {
   error?: string
 }
 
-export interface IssueDates {
-  daysSinceIssueCreation: number
-  daysSinceIssueUpdate: number | null
-  daysSinceIssueClose: number | null
-  isClosed: boolean
+export interface LoaderData {
+  isOpenNext16Yet: boolean
+  versionNumber: number
+  version: string
+  latestNextVersion: string
+  latestNextMajorVersion: number
+  error?: string
 }
-
-export interface LoaderData extends VersionInfo, IssueDates {}
