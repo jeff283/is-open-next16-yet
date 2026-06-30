@@ -1,15 +1,14 @@
 export interface VersionInfo {
-  isOpenNext16Yet: boolean
-  versionNumber: number
+  majorVersion: number
   version: string
   error?: string
 }
 
-export interface IssueDates {
-  daysSinceIssueCreation: number
-  daysSinceIssueUpdate: number | null
-  daysSinceIssueClose: number | null
-  isClosed: boolean
+export interface LoaderData {
+  versionNumber: number
+  version: string
+  latestNextVersion: string
+  latestNextMajorVersion: number
+  vercelVersionHistory: Array<string>
+  error?: string
 }
-
-export interface LoaderData extends VersionInfo, IssueDates {}

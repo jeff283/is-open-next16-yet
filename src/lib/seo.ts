@@ -3,29 +3,30 @@ import { BASE_URL, SITE_NAME, TWITTER_HANDLE } from '@/lib/constants'
 
 export const generateHomePageMeta = (data: LoaderData | undefined) => {
   const fallbackData: LoaderData = {
-    isOpenNext16Yet: false,
-    versionNumber: 15,
-    version: '15.x.x',
-    daysSinceIssueCreation: 0,
-    daysSinceIssueUpdate: null,
-    daysSinceIssueClose: null,
-    isClosed: false,
+    versionNumber: 0,
+    version: 'unknown',
+    latestNextVersion: 'unknown',
+    latestNextMajorVersion: 0,
+    vercelVersionHistory: [],
   }
 
-  const { isOpenNext16Yet, version, daysSinceIssueCreation } =
+  const { version, latestNextVersion, versionNumber, latestNextMajorVersion } =
     data ?? fallbackData
 
-  const status = isOpenNext16Yet ? 'YES' : 'NO'
-  const description = isOpenNext16Yet
-    ? `OpenNextJS Cloudflare is now using Next.js ${version}! 🎉`
-    : `OpenNextJS Cloudflare is still NOT using Next.js 16. It's been ${daysSinceIssueCreation} days since the issue was created. Currently using Next.js ${version}.`
+  const exactMatch = version === latestNextVersion
+  const majorMatch = versionNumber === latestNextMajorVersion
+
+  const status = exactMatch ? 'Exact match' : majorMatch ? 'Close' : 'Behind'
+  const description = exactMatch
+    ? `OpenNextJS Cloudflare and Vercel Next.js are both on ${version}.`
+    : `OpenNextJS Cloudflare is on ${version}, Vercel's latest is ${latestNextVersion}.`
 
   const siteUrl = BASE_URL
 
   return {
     meta: [
       {
-        title: `Is OpenNextJS Cloudflare Using Next.js 16? ${status}`,
+        title: `OpenNextJS Cloudflare vs Vercel Next.js | ${status}`,
       },
       {
         name: 'description',
@@ -44,10 +45,9 @@ export const generateHomePageMeta = (data: LoaderData | undefined) => {
         name: 'robots',
         content: 'index, follow',
       },
-      // Open Graph tags
       {
         property: 'og:title',
-        content: `Is OpenNextJS Cloudflare Using Next.js 16? ${status}`,
+        content: `OpenNextJS Cloudflare vs Vercel Next.js | ${status}`,
       },
       {
         property: 'og:description',
@@ -71,7 +71,7 @@ export const generateHomePageMeta = (data: LoaderData | undefined) => {
       },
       {
         property: 'og:image',
-        content: `${BASE_URL}/og-image.png`, // Create a 1200x630px image for social previews
+        content: `${BASE_URL}/og-image.png`,
       },
       {
         property: 'og:image:width',
@@ -83,16 +83,15 @@ export const generateHomePageMeta = (data: LoaderData | undefined) => {
       },
       {
         property: 'og:image:alt',
-        content: `OpenNextJS Cloudflare Next.js 16 Status: ${status}`,
+        content: `OpenNextJS Cloudflare vs Vercel Next.js: ${status}`,
       },
-      // Twitter Card tags
       {
         name: 'twitter:card',
         content: 'summary_large_image',
       },
       {
         name: 'twitter:title',
-        content: `Is OpenNextJS Cloudflare Using Next.js 16? ${status}`,
+        content: `OpenNextJS Cloudflare vs Vercel Next.js | ${status}`,
       },
       {
         name: 'twitter:description',
@@ -100,7 +99,7 @@ export const generateHomePageMeta = (data: LoaderData | undefined) => {
       },
       {
         name: 'twitter:image',
-        content: `${BASE_URL}/og-image.png`, // Create a 1200x630px image for social previews
+        content: `${BASE_URL}/og-image.png`,
       },
       {
         name: 'twitter:url',
