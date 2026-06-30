@@ -13,7 +13,16 @@ const config = defineConfig({
     devtools(),
     cloudflare({ viteEnvironment: { name: 'ssr' } }),
     tailwindcss(),
-    tanstackStart(),
+    tanstackStart({
+      prerender: {
+        enabled: true,
+        crawlLinks: true, // Discovers all linkable pages
+      },
+      sitemap: {
+        enabled: true,
+        host: 'https://is-open-next16-yet.jgichuki-njoroge.workers.dev',
+      },
+    }),
     viteReact(),
   ],
 })
