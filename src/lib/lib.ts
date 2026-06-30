@@ -1,3 +1,5 @@
+import { major, prerelease, rcompare } from 'semver'
+
 interface NpmRegistryResponse {
   versions: Record<string, unknown>
 }
@@ -25,36 +27,16 @@ export async function getVersionsDownToMajor(
   const data: NpmRegistryResponse = await res.json()
 
   const stableVersions = Object.keys(data.versions).filter(
-    (v) => !v.includes('-'), // exclude canary, preview, beta, rc, etc.
+    (v) => prerelease(v) === null,
   )
 
-  // Sort descending using semver-aware comparison
-  stableVersions.sort((a, b) => compareSemver(b, a))
+  stableVersions.sort(rcompare)
 
-  // Stop once we drop below the requested major version
   const result: Array<string> = []
   for (const version of stableVersions) {
-    const major = parseInt(version.split('.')[0], 10)
-    if (major < minMajor) break
+    if (major(version) < minMajor) break
     result.push(version)
   }
 
   return result
 }
-
-/**
- * Basic semver comparator (assumes no prerelease tags, since we filter those out).
- * Returns positive if a > b, negative if a < b, 0 if equal.
- */
-export function compareSemver(a: string, b: string): number {
-  const pa = a.split('.').map(Number)
-  const pb = b.split('.').map(Number)
-
-  for (let i = 0; i < 3; i++) {
-    if (pa[i] !== pb[i]) return pa[i] - pb[i]
-  }
-  return 0
-}
-
-// Example usage:
-// getVersionsDownToMajor("next", 15).then(console.log);
