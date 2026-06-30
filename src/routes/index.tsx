@@ -1,8 +1,8 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { getOpenNextVersion, getIssueDates } from '@/lib/api'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import type { LoaderData } from '@/lib/types'
+import { getIssueDates, getOpenNextVersion } from '@/lib/api'
 import { generateHomePageMeta } from '@/lib/seo'
 import { TARGET_VERSION } from '@/lib/constants'
-import type { LoaderData } from '@/lib/types'
 
 export const Route = createFileRoute('/')({
   loader: async (): Promise<LoaderData> => {

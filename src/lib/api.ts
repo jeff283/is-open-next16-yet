@@ -1,17 +1,17 @@
 import { z } from 'zod'
+import type { IssueDates, VersionInfo } from '@/lib/types'
 import {
-  packageJsonSchema,
   githubIssueSchema,
-  versionStringSchema,
   isoDateStringSchema,
+  packageJsonSchema,
+  versionStringSchema,
 } from '@/lib/schemas'
 import {
-  PACKAGE_JSON_URL,
   GITHUB_ISSUE_URL,
-  TARGET_VERSION,
   ISSUE_CREATED_AT,
+  PACKAGE_JSON_URL,
+  TARGET_VERSION,
 } from '@/lib/constants'
-import type { VersionInfo, IssueDates } from '@/lib/types'
 
 export const getOpenNextVersion = async (): Promise<VersionInfo> => {
   try {
