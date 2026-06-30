@@ -35,6 +35,18 @@ export const Route = createFileRoute('/')({
   component: App,
 })
 
+function VersionDisplay({ version }: { version: string }) {
+  const parts = version.split('.')
+  const prefix = parts.slice(0, -1).join('.') + '.'
+  const patch = parts.at(-1) ?? version
+  return (
+    <p className="text-xl font-black text-black font-mono">
+      <span className="opacity-40">{prefix}</span>
+      <span>{patch}</span>
+    </p>
+  )
+}
+
 function App() {
   const {
     versionNumber,
@@ -82,17 +94,13 @@ function App() {
               <p className="text-xs font-black uppercase tracking-widest text-black mb-2">
                 Vercel Next.js
               </p>
-              <p className="text-xl font-black text-black font-mono">
-                {latestNextVersion}
-              </p>
+              <VersionDisplay version={latestNextVersion} />
             </div>
             <div className="p-5 bg-white text-center">
               <p className="text-xs font-black uppercase tracking-widest text-black mb-2">
                 OpenNextJS CF
               </p>
-              <p className="text-xl font-black text-black font-mono">
-                {version}
-              </p>
+              <VersionDisplay version={version} />
             </div>
           </div>
         </div>
