@@ -7,6 +7,29 @@ export const PACKAGE_MANAGERS: Array<PackageManager> = [
   'bun',
 ]
 
+/** Runtime packages we surface for upgrade commands. */
+const RUNTIME_PACKAGES = [
+  '@opennextjs/cloudflare',
+  'next',
+  'react',
+  'react-dom',
+] as const
+
+/** Matching type packages only — skip tooling like tailwind/eslint/wrangler. */
+const TYPE_PACKAGES = ['@types/react', '@types/react-dom'] as const
+
+function pickPackages(
+  source: Record<string, string>,
+  names: ReadonlyArray<string>,
+): Record<string, string> {
+  const picked: Record<string, string> = {}
+  for (const name of names) {
+    const version = source[name]
+    if (version) picked[name] = version
+  }
+  return picked
+}
+
 function toSpecs(packages: Record<string, string>): Array<string> {
   return Object.entries(packages).map(([name, version]) => `${name}@${version}`)
 }
@@ -16,8 +39,8 @@ export function buildUpdateCommand(
   dependencies: Record<string, string>,
   devDependencies: Record<string, string>,
 ): string {
-  const deps = toSpecs(dependencies)
-  const devDeps = toSpecs(devDependencies)
+  const deps = toSpecs(pickPackages(dependencies, RUNTIME_PACKAGES))
+  const devDeps = toSpecs(pickPackages(devDependencies, TYPE_PACKAGES))
 
   const depCmd = (() => {
     switch (manager) {
