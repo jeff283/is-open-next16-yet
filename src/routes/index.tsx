@@ -3,6 +3,7 @@ import { gte } from 'semver'
 import type { LoaderData } from '@/lib/types'
 import { getNextNpmData, getOpenNextVersion } from '@/lib/api'
 import { generateHomePageMeta } from '@/lib/seo'
+import { UpdateCommand } from '@/components/update-command'
 
 export const Route = createFileRoute('/')({
   // Both fetches run in parallel — one GitHub call, one npm call
@@ -31,6 +32,8 @@ export const Route = createFileRoute('/')({
         latestNextVersion: 'error',
         latestNextMajorVersion: 0,
         vercelVersionHistory: [],
+        dependencies: {},
+        devDependencies: {},
         error: error instanceof Error ? error.message : 'Unknown error',
       }
     }
@@ -92,10 +95,19 @@ function PageSkeleton() {
           ))}
         </div>
 
-        {/* Match status card skeleton */}
-        <div className="border-4 border-black p-5 mb-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-gray-100 text-center space-y-2">
-          <SkeletonBlock className="h-2 w-24 mx-auto" />
-          <SkeletonBlock className="h-8 w-32 mx-auto" />
+        {/* Update command skeleton */}
+        <div className="border-4 border-black mb-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden bg-zinc-950">
+          <div className="flex items-center gap-2 border-b border-zinc-800 px-3 py-2">
+            <SkeletonBlock className="h-3.5 w-3.5 bg-zinc-700" />
+            <SkeletonBlock className="h-6 w-12 bg-zinc-700" />
+            <SkeletonBlock className="h-6 w-10 bg-zinc-800" />
+            <SkeletonBlock className="h-6 w-10 bg-zinc-800" />
+            <SkeletonBlock className="h-6 w-10 bg-zinc-800" />
+          </div>
+          <div className="p-4 space-y-2">
+            <SkeletonBlock className="h-4 w-full bg-zinc-800" />
+            <SkeletonBlock className="h-4 w-3/4 bg-zinc-800" />
+          </div>
         </div>
 
         <div className="text-center">
@@ -251,24 +263,15 @@ function VersionHistoryList({
 
 function App() {
   const {
-    versionNumber,
     version,
     latestNextVersion,
-    latestNextMajorVersion,
     vercelVersionHistory,
+    dependencies,
+    devDependencies,
     error,
   } = Route.useLoaderData()
 
   const exactMatch = version === latestNextVersion
-  const majorMatch = versionNumber === latestNextMajorVersion
-
-  const statusBg = exactMatch
-    ? 'bg-green-300'
-    : majorMatch
-      ? 'bg-orange-300'
-      : 'bg-red-300'
-
-  const statusLabel = exactMatch ? 'Exact match' : majorMatch ? 'Close' : 'Behind'
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-white">
@@ -312,15 +315,10 @@ function App() {
           />
         )}
 
-        {/* Match Status */}
-        <div
-          className={`border-4 border-black p-5 mb-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center ${statusBg}`}
-        >
-          <p className="text-xs font-black uppercase tracking-widest text-black mb-1">
-            Match Status
-          </p>
-          <p className="text-3xl font-black text-black">{statusLabel}</p>
-        </div>
+        <UpdateCommand
+          dependencies={dependencies}
+          devDependencies={devDependencies}
+        />
 
         {/* Footer */}
         <div className="text-center">
