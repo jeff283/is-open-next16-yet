@@ -8,6 +8,8 @@ export const generateHomePageMeta = (data: LoaderData | undefined) => {
     latestNextVersion: 'unknown',
     latestNextMajorVersion: 0,
     vercelVersionHistory: [],
+    dependencies: {},
+    devDependencies: {},
   }
 
   const { version, latestNextVersion, versionNumber, latestNextMajorVersion } =

@@ -2,9 +2,12 @@ import { z } from 'zod'
 import { major, valid } from 'semver'
 
 export const packageJsonSchema = z.object({
-  dependencies: z.object({
-    next: z.string().min(1, 'Version string cannot be empty'),
-  }),
+  dependencies: z
+    .record(z.string(), z.string())
+    .refine((deps) => typeof deps.next === 'string' && deps.next.length > 0, {
+      message: 'dependencies.next is required',
+    }),
+  devDependencies: z.record(z.string(), z.string()).optional().default({}),
 })
 
 // Schema for version string (e.g., "15.0.0", "16.1.2")

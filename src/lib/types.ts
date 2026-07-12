@@ -10,5 +10,7 @@ export interface LoaderData {
   latestNextVersion: string
   latestNextMajorVersion: number
   vercelVersionHistory: Array<string>
+  dependencies: Record<string, string>
+  devDependencies: Record<string, string>
   error?: string
 }
