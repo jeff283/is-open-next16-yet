@@ -14,13 +14,9 @@ export function UpdateCommand({
   const [manager, setManager] = useState<PackageManager>('pnpm')
   const [copied, setCopied] = useState(false)
 
-  const hasPackages =
-    Object.keys(dependencies).length > 0 ||
-    Object.keys(devDependencies).length > 0
-
-  if (!hasPackages) return null
-
   const command = buildUpdateCommand(manager, dependencies, devDependencies)
+
+  if (!command) return null
 
   async function handleCopy() {
     try {
