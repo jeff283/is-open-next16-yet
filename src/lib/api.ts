@@ -52,6 +52,8 @@ export const getNextNpmData = async (): Promise<{
 export const getOpenNextVersion = async (): Promise<{
   versionNumber: number
   version: string
+  dependencies: Record<string, string>
+  devDependencies: Record<string, string>
   error?: string
 }> => {
   try {
@@ -75,12 +77,16 @@ export const getOpenNextVersion = async (): Promise<{
     return {
       versionNumber: major(validatedVersion),
       version: validatedVersion,
+      dependencies: parsed.dependencies,
+      devDependencies: parsed.devDependencies,
     }
   } catch (error) {
     console.error('Error fetching OpenNextJS version:', error)
     return {
       versionNumber: 0,
       version: 'error',
+      dependencies: {},
+      devDependencies: {},
       error:
         error instanceof z.ZodError
           ? error.issues.map((issue) => issue.message).join(', ')
